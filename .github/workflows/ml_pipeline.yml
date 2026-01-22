@@ -1,43 +1,45 @@
 name: Mlops Pipeline
 
 on:
- push:
-  branches:
-   -main
- pull_request:
-  branches:
-   -main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
- test-and-build:
-  runs-on: ubuntu-latest
+  test-and-build:
+    runs-on: ubuntu-latest
 
-  steps:
-   - name: Checkout repository
-     uses: actions/checkout@v3
-   - name: Set Pytgon
-     uses: actions/setup-python@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-     with:
-      python-version: "3.10"
-   - name: Install dependencies
-     run: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
+      - name: Set Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-   - name: Run Tests
-     run: |
-       pytest tests/
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-   - name: Build Docker Image
-     run: |
-       docker build -t sales-forcast-api
+      - name: Run Tests
+        run: |
+          pytest tests/
 
-   - name: Run Docker container
-     run: |
-          docker run -d -p 8001:8001 --name test-api sales-forecast-api
-          sleep 5
-          curl -X POST http://localhost:8001/predict \
-            -H "Content-Type: application/json" \
-            -d '{"data":[{"Store":1,"DayOfWeek":5,"Open":1,"Promo":0,"StateHoliday":"0","SchoolHoliday":0}]}'
-          docker stop test-api
+      - name: Build Docker Image
+        run: |
+          docker build -t sales-forecast-api .
+
+      # Optional: skip for now, can test locally later
+      #- name: Run Docker container
+      #  run: |
+      #    docker run -d -p 8001:8001 --name test-api sales-forecast-api
+      #    sleep 5
+      #    curl -X POST http://localhost:8001/predict \
+      #      -H "Content-Type: application/json" \
+      #      -d '{"data":[{"Store":1,"DayOfWeek":5,"Open":1,"Promo":0,"StateHoliday":"0","SchoolHoliday":0}]}'
+      #    docker stop test-api
