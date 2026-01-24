@@ -35,8 +35,8 @@ jobs:
           docker build -t sales-forecast-api:ci .
 
 
-      -name: Test Docker container
-       run: |
+      - name: Test Docker container
+        run: |
          docker run -d -p 8001:8001 --name test-api sales-forcast-api:ci
          sleep 5 
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8001/predict \
@@ -46,7 +46,7 @@ jobs:
           if [ "$RESPONSE" -ne 200 ]; then
             echo "API test failed!"
             exit 1
-            
+
       - name: Push Docker image
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
