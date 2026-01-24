@@ -37,7 +37,7 @@ jobs:
 
       - name: Test Docker container
         run: |
-         docker run -d -p 8001:8001 --name test-api sales-forcast-api:ci
+         docker run -d -p 8001:8001 --name test-api sales-forecast-api:ci
          sleep 5 
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8001/predict \
             -H "Content-Type: application/json" \
