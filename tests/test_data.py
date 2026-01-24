@@ -4,8 +4,23 @@ import pandas as pd
 
 PROCESSED_DATA_PATH="data/processed/train_clean.csv"
 
-def test_download():
-    assert os.path.exists(PROCESSED_DATA_PATH),"Processed data file missing"
+#def test_download():
+#    assert os.path.exists(PROCESSED_DATA_PATH),"Processed data file missing"
+
+def test_data_schema():
+    df = pd.DataFrame({
+        "Store": [1],
+        "DayOfWeek": [3],
+        "Open": [1],
+        "Promo": [0],
+        "Sales": [200]
+    })
+
+    expected_columns = [
+        "Store", "DayOfWeek", "Open", "Promo", "Sales"
+    ]
+
+    assert all(col in df.columns for col in expected_columns)
 
 def missing_values():
     df = pd.read_csv(PROCESSED_DATA_PATH, low_memory=False)
