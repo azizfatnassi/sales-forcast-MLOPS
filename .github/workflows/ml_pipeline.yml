@@ -13,33 +13,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set Python
+      # 2️⃣ Setup Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Tests
+      # 4️⃣ Run unit tests
+      - name: Run pytest tests
         run: |
           pytest tests/ --maxfail=1 --disable-warnings
 
+      # 5️⃣ Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t sales-forcast-api:ci .
 
+      # 6️⃣ Debug: ensure test script exists and has correct line endings
+      - name: Check test script
+        run: |
+          ls -la tests/
+          cat -v tests/test_api.sh   # will show ^M if CRLF endings
 
+      # 7️⃣ Make the test script executable
+      - name: Make API test script executable
+        run: chmod +x tests/test_api.sh
+
+      # 8️⃣ Run API test script (with tracing for debugging)
       - name: Test Docker container
-        run: bash tests/test_api.sh
+        run: bash -x tests/test_api.sh
 
-
+      # 9️⃣ Push Docker image to DockerHub (optional)
       - name: Push Docker image
+        if: github.ref == 'refs/heads/main'
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker tag sales-forcast-api:ci your-dockerhub-username/sales-forcast-api:latest
