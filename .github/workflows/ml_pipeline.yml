@@ -36,9 +36,9 @@ jobs:
 
 
       - name: Test Docker container
-        run: ./tests/test_api.sh
+        run: bash tests/test_api.sh
 
-        
+
       - name: Push Docker image
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
