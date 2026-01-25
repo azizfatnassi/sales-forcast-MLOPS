@@ -60,3 +60,7 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker tag sales-forcast-api:ci your-dockerhub-username/sales-forcast-api:latest
           docker push your-dockerhub-username/sales-forcast-api:latest
+
+      - name: Check script line endings
+        run: cat -v tests/test_api.sh
+
