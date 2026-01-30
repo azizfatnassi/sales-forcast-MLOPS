@@ -1,66 +1,55 @@
-name: Mlops Pipeline
+name: MLOps Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  test-and-build:
+  test-build-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
+      # 1️⃣ Get your code into the runner
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup Python
-      - name: Setup Python
+      # 2️⃣ Set Python environment
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # 3️⃣ Install dependencies
+      # 3️⃣ Install Python dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4️⃣ Run unit tests
-      - name: Run pytest tests
+      # 4️⃣ Run unit tests (data + model tests)
+      - name: Run tests
         run: |
           pytest tests/ --maxfail=1 --disable-warnings
 
-      # 5️⃣ Build Docker Image
-      - name: Build Docker Image
+      # 5️⃣ Build Docker image
+      - name: Build Docker image
         run: |
           docker build -t sales-forcast-api:ci .
 
-      # 6️⃣ Debug: ensure test script exists and has correct line endings
-      - name: Check test script
+      # 6️⃣ Test API inside Docker container
+      - name: Test API container
         run: |
-          ls -la tests/
-          cat -v tests/test_api.sh   # will show ^M if CRLF endings
+          bash tests/test_api.sh
 
-      # 7️⃣ Make the test script executable
-      - name: Make API test script executable
-        run: chmod +x tests/test_api.sh
+      # 7️⃣ Login to Docker Hub (NON-interactive)
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
+            -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      # 8️⃣ Run API test script (with tracing for debugging)
-      - name: Test Docker container
-        run: bash -x tests/test_api.sh
-
-      # 9️⃣ Push Docker image to DockerHub (optional)
+      # 8️⃣ Tag & push image
       - name: Push Docker image
-        if: github.ref == 'refs/heads/main'
         run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag sales-forcast-api:ci your-dockerhub-username/sales-forcast-api:latest
-          docker push your-dockerhub-username/sales-forcast-api:latest
-
-      - name: Check script line endings
-        run: cat -v tests/test_api.sh
-
+          docker tag sales-forcast-api:ci ${{ secrets.DOCKER_USERNAME }}/sales-forcast-api:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/sales-forcast-api:latest
