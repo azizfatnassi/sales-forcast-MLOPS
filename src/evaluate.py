@@ -5,18 +5,22 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error 
 
-MODEL_PATH="models/model.pkl"
+VERSION= os.getenv("VERSION","dev")
+
+MODEL_PATH=f"models/model_{VERSION}.pkl"
 DATA_PATH="data/processed/train_clean.csv"
-METRICS_PATH="models/metrics.json"
+METRICS_PATH=f"models/metrics_{VERSION}.json"
 PREVIOUS_METRICS_PATH = "models/metrics_prev.json"
 
 def load_data():
     return pd.read_csv(DATA_PATH)
 
 def load_model():
-     if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError(" model file not found")
-     return joblib.load(MODEL_PATH)
+    if not os.path.exists(MODEL_PATH):
+        raise FileNotFoundError(
+            f"Model file not found for version '{VERSION}': {MODEL_PATH}"
+        )
+    return joblib.load(MODEL_PATH)
 
 def evaluate_model(model,x_val,y_val):
     preds=model.predict(x_val)
