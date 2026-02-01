@@ -27,15 +27,36 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+#model versioning
+      - name: Set version
+        run: |
+          echo "VERSION=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      # run training to pass the version
+
+      - name: Run Training
+        shell: bash
+        run: |
+          VERSION=dev
+          python src/training.py --version $VERSION
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Run Evaluation
+        run: |
+             python src/evaluate.py 
+         
+
       # 4️⃣ Run unit tests (data + model tests)
       - name: Run tests
         run: |
           pytest tests/ --maxfail=1 --disable-warnings
 
+      
+
       # 5️⃣ Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t sales-forcast-api:ci .
+          docker build -t sales-forcast-api:${{ env.VERSION}} .
 
       # 6️⃣ Test API inside Docker container
       - name: Test API container
