@@ -38,7 +38,7 @@ jobs:
         shell: bash
         run: |
           VERSION=dev
-          python src/training.py --version $VERSION
+          python src/train.py --version $VERSION
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Run Evaluation
