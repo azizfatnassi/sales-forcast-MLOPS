@@ -3,55 +3,50 @@ import json
 import joblib
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
 
+PROCESSED_DATA_PATH = "data/processed/train_clean.csv"
+MODELS_DIR = "models"
 
-PROCESSED_DATA_PATH="data/processed/train_clean.csv"
-MODEL_DIR="models"
-MODEL_PATH=os.path.join(MODEL_DIR,"model.pkl")
-FEATURES_PATH=os.path.join(MODEL_DIR,"features.json")
-
+def get_version():
+    return os.getenv("VERSION", "dev")
 
 def load_data():
-   if not os.path.exists(PROCESSED_DATA_PATH):
-      raise FileNotFoundError("processed data not found")
-   return pd.read_csv(PROCESSED_DATA_PATH)
+    if not os.path.exists(PROCESSED_DATA_PATH):
+        raise FileNotFoundError("Processed data not found")
+    return pd.read_csv(PROCESSED_DATA_PATH)
 
 def prepare_features(df):
-   target= "Sales"
+    target = "Sales"
+    features = ["Store", "DayOfWeek", "Open", "Promo"]
 
-   features=[
-        "Store",
-        "DayOfWeek",
-        "Open",
-        "Promo"
-    ]
-   
-   X=df[features]
-   Y=df[target]
+    X = df[features]
+    y = df[target]
+    return X, y, features
 
-   return X,Y, features
+def train_model(X, y):
+    model = LinearRegression()
+    model.fit(X, y)
+    return model
 
-def train_model(X, Y):
-   model=LinearRegression()
-   model.fit(X, Y)
-   return model
+def save_artifacts(model, features, version):
+    version_dir = os.path.join(MODELS_DIR, version)
+    os.makedirs(version_dir, exist_ok=True)
 
-def save_artifacts(model,features):
-   os.makedirs(MODEL_DIR,exist_ok=True)
-   joblib.dump(model,MODEL_PATH)
+    joblib.dump(model, os.path.join(version_dir, "model.pkl"))
 
-   with open(FEATURES_PATH,"w") as f:
-      json.dump(features,f)
+    with open(os.path.join(version_dir, "features.json"), "w") as f:
+        json.dump(features, f)
 
-def run_training_pipeline():
-   df=load_data()
-   X,Y, features=prepare_features(df)
+    print(f"Artifacts saved with version: {version}")
 
-   model=train_model(X, Y) 
+def main():
+    version = get_version()
+    df = load_data()
+    X, y, features = prepare_features(df)
+    model = train_model(X, y)
+    save_artifacts(model, features, version)
 
-   save_artifacts(model, features)
-   print("Training completed")
+    print(f"Training completed with version: {version}")
 
-if __name__ =="__main__":
-   run_training_pipeline()  
+if __name__ == "__main__":
+    main()
