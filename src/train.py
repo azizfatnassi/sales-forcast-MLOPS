@@ -4,15 +4,29 @@ import joblib
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-PROCESSED_DATA_PATH = "data/processed/train_clean.csv"
-MODELS_DIR = "models"
+# -------------------------
+# BASE PATHS
+# -------------------------
+# Get repo root (two levels up from this script)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+PROCESSED_DATA_PATH = os.path.join(BASE_DIR, "data", "processed", "train_clean.csv")
+MODELS_DIR = os.path.join(BASE_DIR, "models")
+
+# -------------------------
+# FUNCTIONS
+# -------------------------
 def get_version():
+    """
+    Get the model version from environment variable 'VERSION'
+    Defaults to 'dev' if not set
+    """
     return os.getenv("VERSION", "dev")
 
 def load_data():
     if not os.path.exists(PROCESSED_DATA_PATH):
-        raise FileNotFoundError("Processed data not found")
+        raise FileNotFoundError(f"Processed data not found at {PROCESSED_DATA_PATH}")
+    print(f"Loading data from: {PROCESSED_DATA_PATH}")
     return pd.read_csv(PROCESSED_DATA_PATH)
 
 def prepare_features(df):
@@ -32,13 +46,20 @@ def save_artifacts(model, features, version):
     version_dir = os.path.join(MODELS_DIR, version)
     os.makedirs(version_dir, exist_ok=True)
 
-    joblib.dump(model, os.path.join(version_dir, "model.pkl"))
+    model_path = os.path.join(version_dir, "model.pkl")
+    features_path = os.path.join(version_dir, "features.json")
 
-    with open(os.path.join(version_dir, "features.json"), "w") as f:
+    joblib.dump(model, model_path)
+    with open(features_path, "w") as f:
         json.dump(features, f)
 
     print(f"Artifacts saved with version: {version}")
+    print(f"Model path: {model_path}")
+    print(f"Features path: {features_path}")
 
+# -------------------------
+# MAIN
+# -------------------------
 def main():
     version = get_version()
     df = load_data()
