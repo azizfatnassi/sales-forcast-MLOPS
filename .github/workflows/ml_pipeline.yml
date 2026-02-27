@@ -26,6 +26,18 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+#DVC
+      - name: Install DVC 
+        run : pip install DVC
+
+      - name: Install DVC with GDrive
+        run: pip install "dvc[gdrive]"
+
+
+      - name: Pull Dataset
+        run : dvc pull
+
+     
 
 #model versioning
       - name: Set version

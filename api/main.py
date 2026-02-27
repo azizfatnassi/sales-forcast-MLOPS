@@ -6,9 +6,8 @@ from typing import List
 import json
 from pydantic import BaseModel
 
-
-
-MODEL_PATH="models/model.pkl"
+VERSION= os.getenv("VERSION","local")
+MODEL_PATH=f"models/model_{VERSION}.pkl"
 FEATUTRE_PATH="models/features.json"
 
 model=joblib.load(MODEL_PATH)
