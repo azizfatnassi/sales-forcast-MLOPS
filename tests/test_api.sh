@@ -4,7 +4,13 @@ set -e
 echo "Starting API container..."
 docker run -d -p 8001:8001 --name test-api sales-forcast-api:ci
 
-sleep 10
+sleep 5
+
+echo "Container status:"
+docker ps -a
+
+echo "Container logs:"
+docker logs test-api
 
 echo "Calling /predict endpoint..."
 RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
