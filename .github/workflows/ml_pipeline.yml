@@ -66,12 +66,21 @@ jobs:
           pytest tests/ --maxfail=1 --disable-warnings
 
       
-
+       
       # 5️⃣ Build Docker image
       - name: Build Docker image
         run: |
           docker build -t sales-forcast-api:ci .
           docker build -t sales-forcast-api:${{ env.VERSION}} .
+     
+     
+      - name: Show Docker images
+        run: docker images
+
+      - name: Verify image exists before test
+        run: |
+         echo "Checking image..."
+         docker images | grep sales-forcast-api || echo "Image NOT found"
 
       # 6️⃣ Test API inside Docker container
       - name: Test API container
