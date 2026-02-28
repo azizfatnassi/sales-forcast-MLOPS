@@ -29,15 +29,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 #DVC
-      - name: Install DVC 
-        run : pip install DVC
+      #- name: Install DVC 
+        #run : pip install DVC
 
-      - name: Install DVC with GDrive
-        run: pip install "dvc[gdrive]"
+      #- name: Install DVC with GDrive
+       # run: pip install "dvc[gdrive]"
 
 
-      - name: Pull Dataset
-        run : dvc pull
+      #- name: Pull Dataset
+      #  run : dvc pull
 
      
 
@@ -70,6 +70,7 @@ jobs:
       # 5️⃣ Build Docker image
       - name: Build Docker image
         run: |
+          docker build -t sales-forcast-api:ci .
           docker build -t sales-forcast-api:${{ env.VERSION}} .
 
       # 6️⃣ Test API inside Docker container
