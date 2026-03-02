@@ -1,36 +1,35 @@
-import os 
-import joblib
 from fastapi import FastAPI
-import pandas as pd
+import os, joblib, json, pandas as pd
 from typing import List
-import json
 from pydantic import BaseModel
 
-VERSION= os.getenv("VERSION","local")
-MODEL_PATH=f"models/model_{VERSION}.pkl"
-FEATUTRE_PATH="models/features.json"
-
-model=joblib.load(MODEL_PATH)
-
-with open(FEATUTRE_PATH,"r") as f :
-    features=json.load(f)
-
-app=FastAPI(title="Sales Forcast API")
+app = FastAPI(title="Sales Forecast API")
 
 class SalesRequest(BaseModel):
-    data:List[dict]
+    data: List[dict]
 
-@app.post("/predict")   
+model = None
+features = None
+
+def load_model():
+    global model, features
+    if model is None:
+        VERSION = os.getenv("VERSION", "dev")
+        MODEL_PATH = f"models/model_{VERSION}.pkl"
+        FEATURE_PATH = "models/features.json"
+        model = joblib.load(MODEL_PATH)
+        with open(FEATURE_PATH, "r") as f:
+            features = json.load(f)
+
+@app.post("/predict")
 def predict(request: SalesRequest):
-   
-   try:
-    df=pd.DataFrame(request.data) 
-    X=df[features]
-    preds = model.predict(X)
-
-    return{"predictions":preds.tolist()}
-   except KeyError as e:
-        return {"error": f"Missing column in input: {str(e)}"}
-   except Exception as e:
+    try:
+        load_model()
+        df = pd.DataFrame(request.data)
+        X = df[features]
+        preds = model.predict(X)
+        return {"predictions": preds.tolist()}
+    except KeyError as e:
+        return {"error": f"Missing column: {str(e)}"}
+    except Exception as e:
         return {"error": str(e)}
-    

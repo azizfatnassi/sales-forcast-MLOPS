@@ -71,7 +71,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t sales-forcast-api:ci .
-          docker build -t sales-forcast-api:${{ env.VERSION}} .
+          docker build --build-arg VERSION=${{ env.VERSION }} -t sales-forcast-api:ci .
      
      
       - name: Show Docker images
