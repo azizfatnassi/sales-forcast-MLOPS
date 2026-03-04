@@ -51,6 +51,7 @@ def save_artifacts(model, features, version):
     features_path = os.path.join(version_dir, "features.json")
 
     joblib.dump(model, model_path)
+
     with open(features_path, "w") as f:
         json.dump(features, f)
 
@@ -58,6 +59,7 @@ def save_artifacts(model, features, version):
     print(f"Model path: {model_path}")
     print(f"Features path: {features_path}")
 
+    return model_path, features_path  
 # -------------------------
 # MAIN
 # -------------------------
