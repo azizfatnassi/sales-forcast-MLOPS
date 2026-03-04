@@ -2,6 +2,8 @@ import json
 import joblib
 import pandas as pd
 import os
+import mlflow
+import mlflow.sklearn
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error 
 
@@ -68,7 +70,17 @@ def run_evaluation():
     with open(PREVIOUS_METRICS_PATH, "w") as f:
         json.dump(metrics, f, indent=2)
 
+
+    mlflow.set_experiment("sales-forcast")
+    with mlflow.start_run(run_name=VERSION):
+        mlflow.log_params({"version":VERSION})
+        mlflow.log_metric(metrics)
+        mlflow.sklearn.log_model(model,f"model_{VERSION}")
+
+
     print("Evaluation passed. Model performance acceptable.")
+    print(f"Logged metrics and model to MLflow with run name '{VERSION}'.")
+    
 if __name__ == "__main__":
     run_evaluation()   
     

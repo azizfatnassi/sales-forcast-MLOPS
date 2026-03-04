@@ -3,7 +3,8 @@ import json
 import joblib
 import pandas as pd
 from sklearn.linear_model import LinearRegression
-
+import mlflow
+import mlflow.sklearn
 # -------------------------
 # BASE PATHS
 # -------------------------
@@ -65,9 +66,20 @@ def main():
     df = load_data()
     X, y, features = prepare_features(df)
     model = train_model(X, y)
-    save_artifacts(model, features, version)
 
-    print(f"Training completed with version: {version}")
+    # Save local artifacts
+    model_path, features_path = save_artifacts(model, features, version)
+
+    # ---------------- MLflow logging ----------------
+    mlflow.set_experiment("Sales-Forecast")
+    with mlflow.start_run(run_name=version):
+        mlflow.log_params({"version": version})
+        # You can log additional info if needed
+        mlflow.sklearn.log_model(model, f"model_{version}")
+        mlflow.log_artifact(features_path)
+        print(f"Model and features logged to MLflow under run name '{version}'.")
+
+    print(f"Training completed for version: {version}")
 
 if __name__ == "__main__":
     main()

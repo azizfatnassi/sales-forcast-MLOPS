@@ -10,6 +10,9 @@ jobs:
   test-build-push:
     runs-on: ubuntu-latest
 
+    env: 
+      MLFLOW_TRACKING_URI: file://./mlruns
+
     steps:
       # 1️⃣ Get your code into the runner
       - name: Checkout repository
@@ -28,6 +31,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install mlflow
 #DVC
       #- name: Install DVC 
         #run : pip install DVC
@@ -50,10 +54,12 @@ jobs:
 
       - name: Run Training
         shell: bash
-        run: |
-          VERSION=dev
-          python src/train.py --version $VERSION
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+       # run: |
+         # VERSION=dev
+         # python src/train.py --version $VERSION
+         # echo "VERSION=$VERSION" >> $GITHUB_ENV
+        run : |
+         python src/train.py --version ${{ env.VERSION }}
 
       - name: Run Evaluation
         run: |
